@@ -386,8 +386,9 @@ static void esp_bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
             uint8_t peer_bdname_len = 0;
             char peer_bdname[ESP_BT_GAP_MAX_BDNAME_LEN + 1];
             for (int i = 0; i < param->disc_res.num_prop; i++) {
+                log_i("PROPS %d PROP %d, type %d",param->disc_res.num_prop , i, param->disc_res.prop[i].type);
                 switch(param->disc_res.prop[i].type) {
-                    case ESP_BT_GAP_DEV_PROP_EIR:  
+                    case ESP_BT_GAP_DEV_PROP_EIR:
                         if (get_name_from_eir((uint8_t*)param->disc_res.prop[i].val, peer_bdname, &peer_bdname_len)) {
                             log_i("ESP_BT_GAP_DISC_RES_EVT : EIR : %s : %d", peer_bdname, peer_bdname_len);
                             if (strlen(_remote_name) == peer_bdname_len
@@ -406,14 +407,14 @@ static void esp_bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
                         memcpy(peer_bdname, param->disc_res.prop[i].val, peer_bdname_len);
                         peer_bdname_len--; // len includes 0 terminator
                         log_v("ESP_BT_GAP_DISC_RES_EVT : BDNAME :  %s : %d", peer_bdname, peer_bdname_len);
-                        if (strlen(_remote_name) == peer_bdname_len
-                            && strncmp(peer_bdname, _remote_name, peer_bdname_len) == 0) {
-                            log_i("ESP_BT_GAP_DISC_RES_EVT : SPP_START_DISCOVERY_BDNAME : %s", peer_bdname);
-                            _isRemoteAddressSet = true;
-                            memcpy(_peer_bd_addr, param->disc_res.bda, ESP_BD_ADDR_LEN);
-                            esp_bt_gap_cancel_discovery();
-                            esp_spp_start_discovery(_peer_bd_addr);
-                        } 
+                        // if (strlen(_remote_name) == peer_bdname_len
+                        //     && strncmp(peer_bdname, _remote_name, peer_bdname_len) == 0) {
+                        //     log_i("ESP_BT_GAP_DISC_RES_EVT : SPP_START_DISCOVERY_BDNAME : %s", peer_bdname);
+                        //     _isRemoteAddressSet = true;
+                        //     memcpy(_peer_bd_addr, param->disc_res.bda, ESP_BD_ADDR_LEN);
+                        //     esp_bt_gap_cancel_discovery();
+                        //     esp_spp_start_discovery(_peer_bd_addr);
+                        // } 
                         break;
 
                     case ESP_BT_GAP_DEV_PROP_COD:
@@ -441,8 +442,8 @@ static void esp_bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
                     default:
                         break;
                 }
-                if (_isRemoteAddressSet)
-                    break;
+                // if (_isRemoteAddressSet)
+                //     break;
             }
             if (peer_bdname_len)
                 advertisedDevice.setName(peer_bdname);
@@ -946,7 +947,7 @@ bool BluetoothSerial::isReady(bool checkMaster, int timeout) {
  */
 BTScanResults* BluetoothSerial::discover(int timeoutMs) {
     scanResults.clear();
-    if (timeoutMs < MIN_INQ_TIME || timeoutMs > MAX_INQ_TIME || strlen(_remote_name) || _isRemoteAddressSet)
+    if (timeoutMs < MIN_INQ_TIME || timeoutMs > MAX_INQ_TIME /*|| strlen(_remote_name) || _isRemoteAddressSet*/)
         return nullptr;
     int timeout = timeoutMs / INQ_TIME;
     log_i("discover::disconnect");
@@ -971,8 +972,8 @@ BTScanResults* BluetoothSerial::discover(int timeoutMs) {
  */
 bool BluetoothSerial::discoverAsync(BTAdvertisedDeviceCb cb, int timeoutMs) {
     scanResults.clear();
-    if (strlen(_remote_name) || _isRemoteAddressSet)
-        return false;
+    // if (strlen(_remote_name) || _isRemoteAddressSet)
+    //     return false;
     int timeout = timeoutMs / INQ_TIME;
     disconnect();
     advertisedDeviceCb = cb;

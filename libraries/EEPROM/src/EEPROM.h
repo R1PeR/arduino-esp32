@@ -45,6 +45,7 @@ class EEPROMClass {
     uint16_t length();
     bool commit();
     void end();
+    void setDirty(bool dirty){_dirty = dirty;};
 
     uint8_t * getDataPtr();
     uint16_t convert(bool clear, const char* EEPROMname = "eeprom", const char* nvsname = "eeprom");
